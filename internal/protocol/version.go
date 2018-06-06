@@ -21,6 +21,7 @@ const (
 	Version39       VersionNumber = gquicVersion0 + 3*0x100 + 0x9
 	Version42       VersionNumber = gquicVersion0 + 4*0x100 + 0x2
 	Version43       VersionNumber = gquicVersion0 + 4*0x100 + 0x3
+	Version44       VersionNumber = gquicVersion0 + 4*0x100 + 0x4
 	VersionTLS      VersionNumber = 101
 	VersionWhatever VersionNumber = 0 // for when the version doesn't matter
 	VersionUnknown  VersionNumber = math.MaxUint32
@@ -83,7 +84,7 @@ func (vn VersionNumber) UsesIETFFrameFormat() bool {
 
 // UsesStopWaitingFrames tells if this version uses STOP_WAITING frames
 func (vn VersionNumber) UsesStopWaitingFrames() bool {
-	return vn.isGQUIC()
+	return vn.isGQUIC() && vn <= Version43
 }
 
 // StreamContributesToConnectionFlowControl says if a stream contributes to connection-level flow control
