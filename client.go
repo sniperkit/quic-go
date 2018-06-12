@@ -23,6 +23,8 @@ type client struct {
 	conn     connection
 	hostname string
 
+	receivedRetry bool
+
 	versionNegotiated                bool // has the server accepted our version
 	receivedVersionNegotiationPacket bool
 	negotiatedVersions               []protocol.VersionNumber // the list of versions from the version negotiation packet
@@ -336,7 +338,14 @@ func (c *client) handleIETFQUICPacket(hdr *wire.Header, packetData []byte, remot
 		return fmt.Errorf("received a packet with an unexpected connection ID (%s, expected %s)", hdr.DestConnectionID, c.srcConnID)
 	}
 	if hdr.IsLongHeader {
-		if hdr.Type != protocol.PacketTypeRetry && hdr.Type != protocol.PacketTypeHandshake {
+		switch hdr.Type {
+		case protocol.PacketTypeRetry:
+			if c.receivedRetry {
+				return nil
+			}
+			c.receivedRetry = true
+		case protocol.PacketTypeHandshake:
+		default:
 			return fmt.Errorf("Received unsupported packet type: %s", hdr.Type)
 		}
 		c.logger.Debugf("len(packet data): %d, payloadLen: %d", len(packetData), hdr.PayloadLen)
